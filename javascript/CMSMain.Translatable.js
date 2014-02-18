@@ -37,18 +37,39 @@
 			},
 			onchange: function(e) {
 				// Get new locale code
-				locale = {locale: $(e.target).val()};
-				
-				// Check existing url
-				search = /locale=[^&]*/;
-				url = document.location.href;
-				if(url.match(search)) {
-					// Replace locale code
-					url = url.replace(search, $.param(locale));
-				} else {
-					// Add locale code
-					url = $.path.addSearchParams(url, locale);
-				}
+				var locale = {locale: $(e.target).val()};
+				var url = document.location.href;
+
+                // Check existing url
+                search = /locale=[^&]*/;
+                if(url.match(search)) {
+                    // Replace locale code
+                    url = url.replace(search, $.param(locale));
+                } else {
+                    // Add locale code
+                    url = $.path.addSearchParams(url, locale);
+                }
+
+                // Get id for translation and fix redirect url
+                var selectedTreeItem = $('.cms-tree').jstree('get_selected');
+                if(selectedTreeItem.length > 0) {
+                    selectedTreeItem = selectedTreeItem.eq(0);
+                    $.get(
+                        $.path.addSearchParams(this.data('translationUrl'), {
+                            'requestedLocale': $(e.target).val(),
+                            'id': selectedTreeItem.data('id'),
+                            'class': selectedTreeItem.data('pagetype')
+                        }),
+                        function(data) {
+                            if(data != '') {
+                                url = data;
+                            }
+                            $('.cms-container').loadPanel(url);
+                        }
+                    );
+                    return false;
+                }
+
 				$('.cms-container').loadPanel(url);
 				return false;
 			}

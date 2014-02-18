@@ -8,7 +8,8 @@
 class LanguageDropdownField extends GroupedDropdownField {
 
 	private static $allowed_actions = array(
-		'getLocaleForObject'
+		'getLocaleForObject',
+        'getURLForTranslationAndLocale'
 	);
 	
 	/**
@@ -84,7 +85,10 @@ class LanguageDropdownField extends GroupedDropdownField {
 	public function getAttributes() {
 		return array_merge(
 			parent::getAttributes(),
-			array('data-locale-url' => $this->Link('getLocaleForObject'))
+			array(
+                'data-locale-url' => $this->Link('getLocaleForObject'),
+                'data-translation-url' => $this->Link('getURLForTranslationAndLocale')
+            )
 		);
 	}
 	
@@ -108,5 +112,24 @@ class LanguageDropdownField extends GroupedDropdownField {
 		}
 		return $locale;
 	}
-	
+
+
+    /**
+     * @param $request
+     * @return string
+     */
+    function getURLForTranslationAndLocale($request) {
+        $id = (int)$request->requestVar('id');
+        $class = Convert::raw2sql($request->requestVar('class'));
+        $requestedLocale = Convert::raw2sql($request->requestVar('requestedLocale'));
+        $url = '';
+        if ($id && $class && class_exists($class) && $class::has_extension('Translatable')) {
+            if(($record = $class::get()->byId($id)) && ($translation = $record->getTranslations($requestedLocale)->First())) {
+                $controller = $translation instanceOf SiteTree ? singleton('CMSPageEditController') : Controller::curr();
+                $url = Controller::join_links($controller->Link('show'), $translation->ID, '?locale=' . $translation->Locale);
+            }
+        }
+        return $url;
+    }
+
 }

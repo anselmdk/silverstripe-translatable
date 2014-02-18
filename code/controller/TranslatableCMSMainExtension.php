@@ -6,6 +6,7 @@ class TranslatableCMSMainExtension extends Extension {
 
 	private static $allowed_actions = array(
 		'createtranslation',
+        'LangForm'
 	);
 
 	function init() {
