@@ -121,12 +121,21 @@ class LanguageDropdownField extends GroupedDropdownField {
     function getURLForTranslationAndLocale($request) {
         $id = (int)$request->requestVar('id');
         $class = Convert::raw2sql($request->requestVar('class'));
-        $requestedLocale = Convert::raw2sql($request->requestVar('requestedLocale'));
+        $locale = Convert::raw2sql($request->requestVar('requestedLocale'));
         $url = '';
         if ($id && $class && class_exists($class) && $class::has_extension('Translatable')) {
-            if(($record = $class::get()->byId($id)) && ($translation = $record->getTranslations($requestedLocale)->First())) {
-                $controller = $translation instanceOf SiteTree ? singleton('CMSPageEditController') : Controller::curr();
-                $url = Controller::join_links($controller->Link('show'), $translation->ID, '?locale=' . $translation->Locale);
+            if(($record = $class::get()->byId($id)) && ($translation = $record->getTranslations($locale)->First())) {
+
+                $controller = $translation instanceOf SiteTree
+                    ? singleton('CMSPageEditController')
+                    : Controller::curr();
+
+                $url = Controller::join_links(
+                    $controller->Link('show'),
+                    $translation->ID,
+                    '?locale=' . $translation->Locale
+                );
+
             }
         }
         return $url;
