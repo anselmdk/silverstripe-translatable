@@ -9,7 +9,7 @@ class LanguageDropdownField extends GroupedDropdownField {
 
 	private static $allowed_actions = array(
 		'getLocaleForObject',
-        'getURLForTranslationAndLocale'
+		'getURLForTranslationAndLocale'
 	);
 	
 	/**
@@ -86,9 +86,9 @@ class LanguageDropdownField extends GroupedDropdownField {
 		return array_merge(
 			parent::getAttributes(),
 			array(
-                'data-locale-url' => $this->Link('getLocaleForObject'),
-                'data-translation-url' => $this->Link('getURLForTranslationAndLocale')
-            )
+				'data-locale-url' => $this->Link('getLocaleForObject'),
+				'data-translation-url' => $this->Link('getURLForTranslationAndLocale')
+			)
 		);
 	}
 	
@@ -114,31 +114,33 @@ class LanguageDropdownField extends GroupedDropdownField {
 	}
 
 
-    /**
-     * @param $request
-     * @return string
-     */
-    function getURLForTranslationAndLocale($request) {
-        $id = (int)$request->requestVar('id');
-        $class = Convert::raw2sql($request->requestVar('class'));
-        $locale = Convert::raw2sql($request->requestVar('requestedLocale'));
-        $url = '';
-        if ($id && $class && class_exists($class) && $class::has_extension('Translatable')) {
-            if(($record = $class::get()->byId($id)) && ($translation = $record->getTranslations($locale)->First())) {
+	/**
+	 * Get the CMS edit url for a translated version of a record
+	 *
+	 * @param $request
+	 * @return url
+	 */
+	function getURLForTranslationAndLocale($request) {
+		$id = (int)$request->requestVar('id');
+		$class = Convert::raw2sql($request->requestVar('class'));
+		$locale = Convert::raw2sql($request->requestVar('requestedLocale'));
+		$url = '';
+		if ($id && $class && class_exists($class) && $class::has_extension('Translatable')) {
+			if(($record = $class::get()->byId($id)) && ($translation = $record->getTranslations($locale)->First())) {
 
-                $controller = $translation instanceOf SiteTree
-                    ? singleton('CMSPageEditController')
-                    : Controller::curr();
+				$controller = $translation instanceOf SiteTree
+					? singleton('CMSPageEditController')
+					: Controller::curr();
 
-                $url = Controller::join_links(
-                    $controller->Link('show'),
-                    $translation->ID,
-                    '?locale=' . $translation->Locale
-                );
+				$url = Controller::join_links(
+					$controller->Link('show'),
+					$translation->ID,
+					'?locale=' . $translation->Locale
+				);
 
-            }
-        }
-        return $url;
-    }
+			}
+		}
+		return $url;
+	}
 
 }
